@@ -1,7 +1,6 @@
 from enum import Enum
 from functools import lru_cache
 
-from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -23,8 +22,13 @@ class Settings(BaseSettings):
     DATABASE_MAX_OVERFLOW: int = 10
     DATABASE_ECHO: bool = False
 
-    BACKEND_CORS_ORIGINS: list[str] = ["http://localhost:5173"]
-    ALLOWED_HOSTS: list[str] = ["*"]
+    # Stored as raw comma-separated strings, not list[str]: pydantic-settings
+    # attempts to JSON-decode any list/complex-typed field sourced from an
+    # env var or .env entry *before* any field_validator runs, so a plain
+    # value like "http://localhost:5173" (not JSON) would crash Settings()
+    # at startup. Parsing lazily via a property sidesteps that entirely.
+    BACKEND_CORS_ORIGINS: str = "http://localhost:5173"
+    ALLOWED_HOSTS: str = "*"
 
     LOG_LEVEL: str = "INFO"
 
@@ -34,12 +38,13 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    @field_validator("BACKEND_CORS_ORIGINS", "ALLOWED_HOSTS", mode="before")
-    @classmethod
-    def split_comma_separated(cls, value: str | list[str]) -> list[str]:
-        if isinstance(value, str):
-            return [item.strip() for item in value.split(",") if item.strip()]
-        return value
+    @property
+    def cors_origins(self) -> list[str]:
+        return [origin.strip() for origin in self.BACKEND_CORS_ORIGINS.split(",") if origin.strip()]
+
+    @property
+    def allowed_hosts(self) -> list[str]:
+        return [host.strip() for host in self.ALLOWED_HOSTS.split(",") if host.strip()]
 
     @property
     def is_development(self) -> bool:

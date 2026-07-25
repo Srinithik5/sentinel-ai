@@ -1,12 +1,15 @@
 import { Suspense } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 
 import { PageContainer } from "@/components/layout/PageContainer";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
+import { ErrorBoundary } from "@/components/system/ErrorBoundary";
 import { Loading } from "@/components/ui/Loading";
 
 export function AppShell() {
+  const location = useLocation();
+
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       <Sidebar />
@@ -14,9 +17,11 @@ export function AppShell() {
         <Topbar />
         <main className="flex-1 overflow-y-auto">
           <PageContainer>
-            <Suspense fallback={<Loading />}>
-              <Outlet />
-            </Suspense>
+            <ErrorBoundary key={location.pathname}>
+              <Suspense fallback={<Loading />}>
+                <Outlet />
+              </Suspense>
+            </ErrorBoundary>
           </PageContainer>
         </main>
       </div>
