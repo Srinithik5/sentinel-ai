@@ -1,0 +1,39 @@
+# Node
+node_modules/
+frontend/dist/
+npm-debug.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+*.egg
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Environment
+.env
+!.env.example
+
+# AI engine artifacts
+ai-engine/data/*
+!ai-engine/data/.gitkeep
+ai-engine/models/*
+!ai-engine/models/.gitkeep
+
+# Docker
+*.pid
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
