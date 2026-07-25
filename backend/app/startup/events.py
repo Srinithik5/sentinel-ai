@@ -1,22 +1,17 @@
-import logging
+from app.core.logging import get_logger
+from app.db.session import check_database_connection, engine
 
-from sqlalchemy import text
-
-from app.db.session import engine
-
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 async def on_startup() -> None:
-    logger.info("Starting SentinelAI backend...")
-    try:
-        with engine.connect() as connection:
-            connection.execute(text("SELECT 1"))
-        logger.info("Database connection established.")
-    except Exception:
-        logger.exception("Database connection failed during startup.")
+    logger.info("application_starting")
+    if await check_database_connection():
+        logger.info("database_connection_established")
+    else:
+        logger.error("database_connection_failed")
 
 
 async def on_shutdown() -> None:
-    logger.info("Shutting down SentinelAI backend...")
-    engine.dispose()
+    logger.info("application_stopping")
+    await engine.dispose()

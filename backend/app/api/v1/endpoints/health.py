@@ -1,25 +1,33 @@
-from datetime import datetime, timezone
+from fastapi import APIRouter, status
+from fastapi.responses import JSONResponse
 
-from fastapi import APIRouter
-from sqlalchemy import text
-
-from app.db.session import engine
+from app.core.config import settings
+from app.db.session import check_database_connection
 from app.schemas.health import HealthResponse
 
 router = APIRouter()
 
 
-@router.get("/health", response_model=HealthResponse, summary="Service health check")
-def health_check() -> HealthResponse:
-    try:
-        with engine.connect() as connection:
-            connection.execute(text("SELECT 1"))
-        database_status = "connected"
-    except Exception:
-        database_status = "unavailable"
+@router.get(
+    "/health",
+    response_model=HealthResponse,
+    summary="Service health check",
+    status_code=status.HTTP_200_OK,
+)
+async def health_check() -> HealthResponse | JSONResponse:
+    database_connected = await check_database_connection()
 
-    return HealthResponse(
-        status="ok",
-        timestamp=datetime.now(timezone.utc),
-        database=database_status,
+    payload = HealthResponse(
+        status="healthy" if database_connected else "degraded",
+        service=settings.SERVICE_NAME,
+        version=settings.VERSION,
+        database="connected" if database_connected else "disconnected",
     )
+
+    if not database_connected:
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content=payload.model_dump(),
+        )
+
+    return payload
