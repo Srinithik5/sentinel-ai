@@ -8,6 +8,16 @@
   --color-accent: #00c2a8;
 }
 
-body {
-  @apply bg-background text-primary antialiased;
+@layer base {
+  * {
+    @apply border-slate-200;
+  }
+
+  body {
+    @apply bg-background text-primary antialiased;
+  }
+
+  ::selection {
+    @apply bg-accent/20 text-primary;
+  }
 }

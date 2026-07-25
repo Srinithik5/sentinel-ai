@@ -1,9 +1,5 @@
-import { Outlet } from "react-router-dom";
+import { AppShell } from "@/components/layout/AppShell";
 
 export function App() {
-  return (
-    <div className="min-h-screen bg-background">
-      <Outlet />
-    </div>
-  );
+  return <AppShell />;
 }
