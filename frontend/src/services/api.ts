@@ -3,8 +3,15 @@ import type { InternalAxiosRequestConfig } from "axios";
 
 import { getAuthToken } from "@/lib/authToken";
 
+// Render's fromService gives just the domain (e.g. https://sentinel-ai-backend.onrender.com).
+// Locally, .env includes the full path. This ensures /api/v1 is always present.
+function resolveBaseUrl(): string {
+  const raw = import.meta.env.VITE_API_BASE_URL ?? "";
+  return raw.includes("/api/v1") ? raw : `${raw.replace(/\/+$/, "")}/api/v1`;
+}
+
 export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: resolveBaseUrl(),
   timeout: 10_000,
   headers: {
     "Content-Type": "application/json",
