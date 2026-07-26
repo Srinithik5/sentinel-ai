@@ -2,6 +2,8 @@
 # Render Blueprint – Infrastructure as Code for Sentinel AI
 # https://docs.render.com/infrastructure-as-code
 #
+# Single-service deploy: FastAPI serves both the API and the React frontend.
+#
 # One-click deploy:
 #   1. Push this file to your repo
 #   2. Go to https://dashboard.render.com/select-repo?type=blueprint
@@ -16,15 +18,15 @@ databases:
     region: oregon
 
 services:
-  # ── Backend (FastAPI) ────────────────────────────────────────────────────
   - type: web
-    name: sentinel-ai-backend
+    name: sentinel-ai
     runtime: python
     region: oregon
     plan: free
-    rootDir: backend
-    buildCommand: pip install -r requirements.txt
-    startCommand: python render_start.py
+    # No rootDir — we need access to both backend/ and frontend/
+    buildCommand: |
+      cd frontend && npm install && npm run build && cd ../backend && pip install -r requirements.txt
+    startCommand: cd backend && python render_start.py
     healthCheckPath: /api/v1/health
     envVars:
       - key: ENVIRONMENT
@@ -34,35 +36,10 @@ services:
           name: sentinel-ai-db
           property: connectionString
       - key: BACKEND_CORS_ORIGINS
-        fromService:
-          type: web
-          name: sentinel-ai-frontend
-          envVarKey: RENDER_EXTERNAL_URL
+        value: ""
       - key: ALLOWED_HOSTS
         value: "*"
       - key: LOG_LEVEL
         value: INFO
-
-  # ── Frontend (React + Vite) ──────────────────────────────────────────────
-  - type: web
-    name: sentinel-ai-frontend
-    runtime: static
-    region: oregon
-    plan: free
-    rootDir: frontend
-    buildCommand: npm install && npm run build
-    staticPublishPath: dist
-    headers:
-      - path: /*
-        name: X-Frame-Options
-        value: SAMEORIGIN
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
-    envVars:
       - key: VITE_API_BASE_URL
-        fromService:
-          type: web
-          name: sentinel-ai-backend
-          envVarKey: RENDER_EXTERNAL_URL
+        value: /api/v1
