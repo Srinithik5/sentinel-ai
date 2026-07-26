@@ -3,6 +3,7 @@ export const ROUTES = {
   alerts: "/alerts",
   entities: "/entities",
   analytics: "/analytics",
+  systemHealth: "/system-health",
   settings: "/settings",
 } as const;
 

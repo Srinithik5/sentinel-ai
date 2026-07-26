@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { BarChart3, Boxes, LayoutDashboard, Settings, ShieldAlert } from "lucide-react";
+import { Activity, BarChart3, Boxes, LayoutDashboard, Settings, ShieldAlert } from "lucide-react";
 
 import { ROUTES } from "@/routes/paths";
 
@@ -14,5 +14,6 @@ export const NAV_ITEMS: NavItem[] = [
   { label: "Alerts", path: ROUTES.alerts, icon: ShieldAlert },
   { label: "Entities", path: ROUTES.entities, icon: Boxes },
   { label: "Analytics", path: ROUTES.analytics, icon: BarChart3 },
+  { label: "System Health", path: ROUTES.systemHealth, icon: Activity },
   { label: "Settings", path: ROUTES.settings, icon: Settings },
 ];

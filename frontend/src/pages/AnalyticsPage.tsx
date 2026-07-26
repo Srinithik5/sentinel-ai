@@ -1,6 +1,11 @@
-import { BarChart3 } from "lucide-react";
-
-import { Card, CardContent } from "@/components/ui/Card";
+import {
+  AttackDistributionChart,
+  GeoDistributionChart,
+  HourlyActivityChart,
+  RiskDistributionChart,
+  SeverityDistributionChart,
+  TopResourcesChart,
+} from "@/components/analytics/Charts";
 import { PageHeader } from "@/components/ui/PageHeader";
 
 export default function AnalyticsPage() {
@@ -8,16 +13,16 @@ export default function AnalyticsPage() {
     <>
       <PageHeader
         title="Analytics"
-        description="Trends and behavioral patterns derived from monitored entities over time."
+        description="Trends and behavioral patterns derived from the detection, classification, and explainability pipelines."
       />
-      <Card>
-        <CardContent className="flex flex-col items-center gap-3 py-16 text-center">
-          <BarChart3 className="h-8 w-8 text-slate-300" aria-hidden="true" />
-          <p className="text-sm text-slate-500">
-            Analytics visualizations will appear here once behavioral models are trained.
-          </p>
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <AttackDistributionChart />
+        <SeverityDistributionChart />
+        <RiskDistributionChart />
+        <HourlyActivityChart />
+        <TopResourcesChart />
+        <GeoDistributionChart />
+      </div>
     </>
   );
 }

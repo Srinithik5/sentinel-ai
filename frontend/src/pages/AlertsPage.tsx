@@ -1,48 +1,21 @@
-import { ShieldAlert } from "lucide-react";
+import { useState } from "react";
 
+import { AlertDetailsPanel } from "@/components/dashboard/AlertDetailsPanel";
+import { AlertQueue } from "@/components/dashboard/AlertQueue";
 import { PageHeader } from "@/components/ui/PageHeader";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableHeaderCell,
-  TableRow,
-} from "@/components/ui/Table";
+import type { Alert } from "@/types/dashboard";
 
 export default function AlertsPage() {
+  const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
+
   return (
     <>
       <PageHeader
-        title="Alerts"
-        description="Security alerts generated from anomalous behavioral signals will be triaged here."
+        title="Live Alert Queue"
+        description="Anomalous events flagged by the Phase 4 Detection Engine and classified by Phase 5, ready for analyst triage."
       />
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableHeaderCell>Severity</TableHeaderCell>
-              <TableHeaderCell>Entity</TableHeaderCell>
-              <TableHeaderCell>Signal</TableHeaderCell>
-              <TableHeaderCell>Detected</TableHeaderCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            <TableRow>
-              <TableCell colSpan={4}>
-                <div className="flex flex-col items-center gap-3 py-12 text-center">
-                  <ShieldAlert className="h-8 w-8 text-slate-300" aria-hidden="true" />
-                  <p className="text-sm text-slate-500">
-                    No alerts to display yet. This view will populate once the detection engine
-                    is enabled.
-                  </p>
-                </div>
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <AlertQueue onSelectAlert={setSelectedAlert} />
+      <AlertDetailsPanel alert={selectedAlert} onClose={() => setSelectedAlert(null)} />
     </>
   );
 }
