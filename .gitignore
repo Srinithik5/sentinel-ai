@@ -39,3 +39,6 @@ Thumbs.db
 *.log
 *.tsbuildinfo
 tailwind.config.js
+
+# Generated synthetic datasets
+ai-engine/data/generated/
