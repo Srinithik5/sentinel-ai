@@ -1,13 +1,9 @@
 # ============================================================================
-# Render Blueprint – Infrastructure as Code for Sentinel AI
+# Render Blueprint – Single-Service Deployment for Sentinel AI
 # https://docs.render.com/infrastructure-as-code
 #
-# Single-service deploy: FastAPI serves both the API and the React frontend.
-#
-# One-click deploy:
-#   1. Push this file to your repo
-#   2. Go to https://dashboard.render.com/select-repo?type=blueprint
-#   3. Select your repo → Render reads this file and provisions everything
+# Single-service deploy using Docker multi-stage build:
+# Node 20 builds the React frontend, Python 3.12 runs FastAPI + serves frontend assets.
 # ============================================================================
 
 databases:
@@ -20,13 +16,11 @@ databases:
 services:
   - type: web
     name: sentinel-ai
-    runtime: python
+    runtime: docker
     region: oregon
     plan: free
-    # No rootDir — we need access to both backend/ and frontend/
-    buildCommand: |
-      cd frontend && npm install && npm run build && cd ../backend && pip install -r requirements.txt
-    startCommand: cd backend && python render_start.py
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     healthCheckPath: /api/v1/health
     envVars:
       - key: ENVIRONMENT
@@ -35,11 +29,7 @@ services:
         fromDatabase:
           name: sentinel-ai-db
           property: connectionString
-      - key: BACKEND_CORS_ORIGINS
-        value: ""
       - key: ALLOWED_HOSTS
         value: "*"
       - key: LOG_LEVEL
         value: INFO
-      - key: VITE_API_BASE_URL
-        value: /api/v1
