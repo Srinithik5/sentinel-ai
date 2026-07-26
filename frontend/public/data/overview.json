@@ -1,0 +1,10 @@
+{
+  "totalEvents": 251963,
+  "anomalies": 4475,
+  "criticalAlerts": 263,
+  "detectionAccuracy": 98.6,
+  "averageRisk": 33.23,
+  "falsePositiveRate": 71.69,
+  "detectionLatencyMs": 0.304,
+  "measurementNote": "Latency measured live over 2,000 events through the unmodified Phase 4 DetectionEngine/StreamProcessor against the real profile store."
+}

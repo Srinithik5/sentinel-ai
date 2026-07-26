@@ -1,0 +1,66 @@
+[
+  {
+    "attackType": "brute_force",
+    "displayName": "Brute Force",
+    "tactic": "Credential Access",
+    "technique": "T1110 Brute Force",
+    "severity": "high",
+    "description": "Repeated authentication attempts against a single account until one succeeds, evidenced by a run of consecutive login failures concentrated in a short window from the entity's own known device."
+  },
+  {
+    "attackType": "impossible_travel",
+    "displayName": "Impossible Travel",
+    "tactic": "Initial Access",
+    "technique": "T1078 Valid Accounts",
+    "severity": "critical",
+    "description": "A login from a geographic location physically unreachable from the entity's previous session within the elapsed time, indicating a stolen or shared credential used from a second location."
+  },
+  {
+    "attackType": "credential_stuffing",
+    "displayName": "Credential Stuffing",
+    "tactic": "Credential Access",
+    "technique": "T1110.004 Credential Stuffing",
+    "severity": "high",
+    "description": "Automated login attempts using credential pairs leaked elsewhere, evidenced by a failed login paired with an unfamiliar device rather than the sustained single-device hammering of brute force."
+  },
+  {
+    "attackType": "lateral_movement",
+    "displayName": "Lateral Movement",
+    "tactic": "Lateral Movement",
+    "technique": "T1021 Remote Services",
+    "severity": "high",
+    "description": "Access to a resource well outside the entity's normal and peer-department resource set, especially a sensitive resource reached via an improbable resource transition — a compromised account pivoting."
+  },
+  {
+    "attackType": "device_spoofing",
+    "displayName": "Device Spoofing",
+    "tactic": "Defense Evasion",
+    "technique": "T1036 Masquerading",
+    "severity": "medium",
+    "description": "A session presenting a device identity inconsistent with the entity's known devices — mismatched fingerprint, or an unfamiliar OS/MAC pairing — indicating identity masquerading."
+  },
+  {
+    "attackType": "low_and_slow_exfiltration",
+    "displayName": "Low-and-Slow Exfiltration",
+    "tactic": "Exfiltration",
+    "technique": "T1030 Data Transfer Size Limits",
+    "severity": "medium",
+    "description": "Sustained, deliberately unhurried access to sensitive or diverse resources — a long session and broad resource diversity without the burstiness of brute force, designed to stay under rate-based detection."
+  },
+  {
+    "attackType": "insider_drift",
+    "displayName": "Insider Drift",
+    "tactic": "Privilege Escalation",
+    "technique": "T1078 Valid Accounts",
+    "severity": "medium",
+    "description": "A gradual, multi-session broadening of a known entity's behaviour — rising privilege and resource footprint across successive profile versions rather than one sharp spike."
+  },
+  {
+    "attackType": "unknown",
+    "displayName": "Unknown",
+    "tactic": "Unknown",
+    "technique": "Unknown",
+    "severity": "low",
+    "description": "Flagged as anomalous by Phase 4, but no known attack signature scored above the minimum match threshold — warrants manual triage rather than an automated category."
+  }
+]

@@ -1,0 +1,39 @@
+{
+  "backend": {
+    "mode": "live",
+    "note": "Polled from GET /api/v1/health in real time by the dashboard."
+  },
+  "database": {
+    "mode": "live",
+    "note": "Reported by the backend health endpoint alongside backend status."
+  },
+  "detectionEngine": {
+    "mode": "batch",
+    "status": "operational",
+    "lastRunId": "20260726-130948",
+    "lastRunPassed": true,
+    "eventsProcessed": 251963,
+    "note": "Offline CLI pipeline (python -m detection.detection_engine)."
+  },
+  "classificationEngine": {
+    "mode": "batch",
+    "status": "operational",
+    "lastRunId": "20260726-131210",
+    "lastRunPassed": true,
+    "eventsProcessed": 4475,
+    "note": "Offline CLI pipeline (python -m classification.classification_engine)."
+  },
+  "explainabilityEngine": {
+    "mode": "batch",
+    "status": "operational",
+    "lastRunId": "20260726-131307",
+    "lastRunPassed": true,
+    "eventsProcessed": 4475,
+    "note": "Offline CLI pipeline (python -m explainability.explainability_engine)."
+  },
+  "streamingPipeline": {
+    "mode": "not_deployed",
+    "status": "offline",
+    "note": "Real-time/streaming ingestion is not yet implemented; all phases currently run as batch CLI jobs."
+  }
+}

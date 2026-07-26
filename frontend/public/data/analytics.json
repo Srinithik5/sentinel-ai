@@ -1,0 +1,282 @@
+{
+  "attackDistribution": [
+    {
+      "label": "device_spoofing",
+      "count": 2102
+    },
+    {
+      "label": "brute_force",
+      "count": 857
+    },
+    {
+      "label": "insider_drift",
+      "count": 546
+    },
+    {
+      "label": "low_and_slow_exfiltration",
+      "count": 438
+    },
+    {
+      "label": "lateral_movement",
+      "count": 265
+    },
+    {
+      "label": "credential_stuffing",
+      "count": 205
+    },
+    {
+      "label": "impossible_travel",
+      "count": 56
+    },
+    {
+      "label": "unknown",
+      "count": 6
+    }
+  ],
+  "severityDistribution": [
+    {
+      "label": "medium",
+      "count": 3571
+    },
+    {
+      "label": "high",
+      "count": 641
+    },
+    {
+      "label": "critical",
+      "count": 263
+    }
+  ],
+  "riskDistribution": [
+    {
+      "label": "0-10",
+      "count": 220309
+    },
+    {
+      "label": "10-20",
+      "count": 17299
+    },
+    {
+      "label": "20-30",
+      "count": 12755
+    },
+    {
+      "label": "30-40",
+      "count": 627
+    },
+    {
+      "label": "40-50",
+      "count": 282
+    },
+    {
+      "label": "50-60",
+      "count": 691
+    },
+    {
+      "label": "60-70",
+      "count": 0
+    },
+    {
+      "label": "70-80",
+      "count": 0
+    },
+    {
+      "label": "80-90",
+      "count": 0
+    },
+    {
+      "label": "90-100",
+      "count": 0
+    }
+  ],
+  "hourlyActivity": [
+    {
+      "hour": 0,
+      "totalEvents": 9551,
+      "anomalousEvents": 164
+    },
+    {
+      "hour": 1,
+      "totalEvents": 9505,
+      "anomalousEvents": 35
+    },
+    {
+      "hour": 2,
+      "totalEvents": 9467,
+      "anomalousEvents": 41
+    },
+    {
+      "hour": 3,
+      "totalEvents": 9515,
+      "anomalousEvents": 74
+    },
+    {
+      "hour": 4,
+      "totalEvents": 9703,
+      "anomalousEvents": 136
+    },
+    {
+      "hour": 5,
+      "totalEvents": 9838,
+      "anomalousEvents": 132
+    },
+    {
+      "hour": 6,
+      "totalEvents": 9953,
+      "anomalousEvents": 98
+    },
+    {
+      "hour": 7,
+      "totalEvents": 10324,
+      "anomalousEvents": 78
+    },
+    {
+      "hour": 8,
+      "totalEvents": 10914,
+      "anomalousEvents": 219
+    },
+    {
+      "hour": 9,
+      "totalEvents": 11609,
+      "anomalousEvents": 348
+    },
+    {
+      "hour": 10,
+      "totalEvents": 11736,
+      "anomalousEvents": 380
+    },
+    {
+      "hour": 11,
+      "totalEvents": 11625,
+      "anomalousEvents": 382
+    },
+    {
+      "hour": 12,
+      "totalEvents": 11536,
+      "anomalousEvents": 273
+    },
+    {
+      "hour": 13,
+      "totalEvents": 11602,
+      "anomalousEvents": 341
+    },
+    {
+      "hour": 14,
+      "totalEvents": 11546,
+      "anomalousEvents": 303
+    },
+    {
+      "hour": 15,
+      "totalEvents": 11472,
+      "anomalousEvents": 344
+    },
+    {
+      "hour": 16,
+      "totalEvents": 11607,
+      "anomalousEvents": 338
+    },
+    {
+      "hour": 17,
+      "totalEvents": 11353,
+      "anomalousEvents": 327
+    },
+    {
+      "hour": 18,
+      "totalEvents": 10224,
+      "anomalousEvents": 124
+    },
+    {
+      "hour": 19,
+      "totalEvents": 9921,
+      "anomalousEvents": 28
+    },
+    {
+      "hour": 20,
+      "totalEvents": 9944,
+      "anomalousEvents": 57
+    },
+    {
+      "hour": 21,
+      "totalEvents": 9767,
+      "anomalousEvents": 91
+    },
+    {
+      "hour": 22,
+      "totalEvents": 9660,
+      "anomalousEvents": 95
+    },
+    {
+      "hour": 23,
+      "totalEvents": 9591,
+      "anomalousEvents": 67
+    }
+  ],
+  "topResources": [
+    {
+      "label": "Git Repository",
+      "count": 783
+    },
+    {
+      "label": "CRM",
+      "count": 638
+    },
+    {
+      "label": "SCADA Historian",
+      "count": 338
+    },
+    {
+      "label": "ERP System",
+      "count": 335
+    },
+    {
+      "label": "Quote System",
+      "count": 285
+    },
+    {
+      "label": "CI/CD Pipeline",
+      "count": 281
+    },
+    {
+      "label": "Kubernetes Cluster",
+      "count": 263
+    },
+    {
+      "label": "HRMS",
+      "count": 261
+    },
+    {
+      "label": "Active Directory",
+      "count": 248
+    },
+    {
+      "label": "Building Automation Controller",
+      "count": 180
+    }
+  ],
+  "geoDistribution": [
+    {
+      "label": "New York, USA",
+      "count": 1136
+    },
+    {
+      "label": "Singapore, Singapore",
+      "count": 878
+    },
+    {
+      "label": "London, United Kingdom",
+      "count": 874
+    },
+    {
+      "label": "Bangalore, India",
+      "count": 751
+    },
+    {
+      "label": "Berlin, Germany",
+      "count": 582
+    },
+    {
+      "label": "Sydney, Australia",
+      "count": 254
+    }
+  ]
+}
