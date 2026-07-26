@@ -11,6 +11,10 @@
   - [2. AI Pipeline Architecture](#2-ai-pipeline-architecture)
   - [3. Data Flow Architecture](#3-data-flow-architecture)
   - [4. Component Interaction Flow](#4-component-interaction-flow)
+  - [5. Frontend ↔ Backend Architecture](#5-frontend--backend-architecture)
+  - [6. Detection Pipeline (Detailed)](#6-detection-pipeline-detailed)
+  - [7. Classification Pipeline (Detailed)](#7-classification-pipeline-detailed)
+  - [8. Explainability Pipeline](#8-explainability-pipeline)
 - [Frontend Architecture](#frontend-architecture)
 - [Backend Architecture](#backend-architecture)
 - [AI Engine Architecture](#ai-engine-architecture)
@@ -68,14 +72,15 @@ flowchart LR
         AI["Synthetic Data -> Attack Injection -> Feature Engineering ->\nBehaviour Profiling -> Detection -> Risk Scoring ->\nClassification -> MITRE Mapping"]
     end
 
-    FE -- "HTTPS / JSON" --> BE
+    FE -- "HTTPS / JSON (health check only)" --> BE
     BE -- "SQLAlchemy (async)" --> DB
     BE -. "not yet connected — future work" .-> AI
+    AI -. "dashboard_export (static JSON)" .-> FE
     FE -. "shared types" .-> SH[shared/]
     BE -. "shared schemas" .-> SH
 ```
 
-Frontend → Backend → Database is a live, working chain today. Backend → AI Engine is the one designed-for, not-yet-built seam — see [Current Limitations](#current-limitations).
+Frontend → Backend → Database is a live, working chain today, but it currently carries only the health check — see [Frontend ↔ Backend Architecture](#5-frontend--backend-architecture) below for exactly which requests are live versus static. Backend → AI Engine is the one designed-for, not-yet-built seam — see [Current Limitations](#current-limitations).
 
 ### 2. AI Pipeline Architecture
 
@@ -169,6 +174,104 @@ sequenceDiagram
 ```
 
 Classification only ever executes on events detection already flagged Suspicious or Anomalous — this single diagram is the entire enforced boundary between the two stages.
+
+### 5. Frontend ↔ Backend Architecture
+
+```mermaid
+flowchart TD
+    subgraph Browser["Browser (React SPA)"]
+        HQ["useHealthQuery\n(TanStack Query, 30s poll)"]
+        DQ["useDashboardData / useAlerts\n(TanStack Query)"]
+        Static["public/data/*.json\noverview, alerts, analytics,\nmitre, system_health"]
+    end
+
+    subgraph Backend["backend/ (FastAPI)"]
+        Health["GET /api/v1/health"]
+        DomainAPI["Domain endpoints\n(alerts, entities, analytics...)"]
+    end
+
+    subgraph Engine["ai-engine/ (offline CLI)"]
+        Pipeline["Phases 2 -> 6\n(detection, classification, explainability)"]
+        Export["dashboard_export\n(python -m dashboard_export.dashboard_export_engine)"]
+    end
+
+    HQ -- "GET /api/v1/health\nevery 30s, live" --> Health
+    DQ -- "fetch()\nbuild-time/deploy-time static files" --> Static
+    Pipeline --> Export
+    Export -- "writes JSON once per export run" --> Static
+    DomainAPI -. "not implemented —\nfuture work, see Current Limitations" .-> Browser
+```
+
+Only one request path is live at runtime: the health check, polled every 30 seconds. Every other screen (Alerts, Entities, Analytics, Executive Overview, MITRE panel) reads from static JSON files fetched once at page load — there is no live backend round-trip for domain data today, and no domain endpoints exist to round-trip to. This is a deliberate Phase 7 design choice (see [Data Contracts and Separation of Concerns](#data-contracts-and-separation-of-concerns)), not an oversight — the "Domain endpoints" box above is the one concretely scoped piece of future work this diagram identifies.
+
+### 6. Detection Pipeline (Detailed)
+
+```mermaid
+flowchart TD
+    EV["Engineered Event\n(Phase 2C, 33 features)"] --> PC["ProfileComparator"]
+    PR["Entity's BehaviourProfile\n(Phase 3, latest version)"] --> PC
+    PC --> D1["Temporal deviation"]
+    PC --> D2["Device deviation"]
+    PC --> D3["Resource deviation"]
+    PC --> D4["Geographic deviation"]
+    PC --> D5["Authentication deviation"]
+    PC --> D6["Session deviation"]
+    D1 & D2 & D3 & D4 & D5 & D6 --> AS["AnomalyScorer\n(weighted_average or max_deviation)"]
+    AS --> Score["anomaly_score (0-1)"]
+    Score --> RE["RiskEngine\nblends anomaly + historical confidence +\ncold-start confidence + entity trust + indicators"]
+    RE --> Risk["risk_score (0-100)"]
+    Risk --> TM["ThresholdManager\n5 severity bands"]
+    TM --> Sev["SeverityLevel"]
+    Risk --> DC["DecisionEngine"]
+    DC --> Verdict["Normal / Suspicious / Anomalous"]
+```
+
+Every box here is a real, independently-testable class in `detection/` — `ProfileComparator`, `AnomalyScorer`, `RiskEngine`, `ThresholdManager`, `DecisionEngine` — wired together by `StreamProcessor.process_event`, the sole per-event execution path for both historical replay and (future) live streaming.
+
+### 7. Classification Pipeline (Detailed)
+
+```mermaid
+flowchart TD
+    Verdict["Suspicious / Anomalous event\n(from Detection Pipeline)"] --> EC["EvidenceCollector"]
+    DS["Phase 4 detection scores"] --> EC
+    FS["Phase 2C engineered features"] --> EC
+    PR["Phase 3 behaviour profile"] --> EC
+    HX["Profile version history"] --> EC
+    EC --> EB["EvidenceBundle"]
+    EB --> AC["AttackClassifier\n(RuleBasedClassificationStrategy)"]
+    Reg["AttackRegistry\n7 attack types + indicators"] --> AC
+    AC --> Scores["Per-attack-type match scores"]
+    Scores --> Pick["Highest-scoring type\n(tie-break: primary deviation dimension)"]
+    Pick --> Threshold{"Above minimum\nmatch threshold?"}
+    Threshold -- "no" --> Unknown["attack_type = unknown"]
+    Threshold -- "yes" --> Known["attack_type = brute_force / impossible_travel / ..."]
+    Known --> CF["ConfidenceEngine\nmatch strength + margin + detection strength"]
+    Unknown --> CF
+    CF --> Conf["confidence (0.0-1.0)"]
+    Known --> MM["MitreMapper"]
+    MM --> Mitre["MITRE tactic + technique"]
+```
+
+`unknown` is a legitimate, expected outcome — not an error state — for events Phase 4 flagged but whose evidence doesn't clearly match any of the 7 known attack signatures.
+
+### 8. Explainability Pipeline
+
+```mermaid
+flowchart TD
+    DR["Phase 4 detection_results"] --> EA["EvidenceAggregator"]
+    CR["Phase 5 classification_report"] --> EA
+    FE["Phase 2C engineered_events"] --> EA
+    PR["Phase 3 profile + version history"] --> EA
+    EA --> EV["ExplainabilityEvidence"]
+    EV --> FA["FeatureAttributionEngine\nnormalizes 6 deviations to % (sum=100)"]
+    EV --> RG["ReasonGenerator\n4-part narrative"]
+    EV --> CE["ConfidenceExplainer\nmatch strength / margin / detection strength"]
+    EV --> RE["RecommendationEngine\nattack-specific + severity escalation"]
+    FA & RG & CE & RE --> AS["AnalystSummaryBuilder"]
+    AS --> Out["AnalystSummary\nEntity, Risk, Attack Type, Confidence,\nSeverity, MITRE, Top Indicators,\nEvidence Summary, Recommended Actions"]
+```
+
+Explainability never re-scores or re-classifies anything — every input above is a value Phase 4 or Phase 5 already computed and persisted; this stage only aggregates, attributes, and narrates.
 
 ## Frontend Architecture
 
@@ -295,8 +398,13 @@ ai-engine/data/
 │   ├── store/                    <entity_id>.json — the live, append-only profile database
 │   └── runs/<run_id>/             profile_summary.csv, drift_report.md, cold_start_report.md
 ├── detections/<run_id>/          detection_results.csv/.parquet, risk_score_report.md, detection_metrics.md
-└── classifications/<run_id>/     classification_report.csv/.parquet, attack_summary.md, confidence_distribution.md
+├── classifications/<run_id>/     classification_report.csv/.parquet, attack_summary.md, confidence_distribution.md
+├── explainability/<run_id>/      explainability_report.csv/.parquet, analyst_summary.csv/.parquet/.md
+├── dashboard_export/<run_id>/    export_summary.md, dashboard_export_validation_report.md (provenance only)
+└── evaluation/<run_id>/          evaluation_report.md, metrics_report.md, scalability_report.md, and more
 ```
+
+`frontend/public/data/` (outside `ai-engine/data/`, not gitignored) holds the 5 JSON fixtures `dashboard_export` actually writes — `overview.json`, `alerts.json`, `analytics.json`, `mitre.json`, `system_health.json` — the real deliverable of that stage.
 
 No database is used anywhere inside the AI engine. There is no shared cache, message queue, or in-memory service — every cross-phase contract is a file, which is what makes each phase independently testable, inspectable, and re-runnable.
 
@@ -329,17 +437,22 @@ No database is used anywhere inside the AI engine. There is no shared cache, mes
 | ✅ Phase 3 — Behaviour Profiling Engine | Implemented and verified |
 | ✅ Phase 4 — Anomaly Detection and Risk Scoring | Implemented and verified (251,884 events scored, 0 validation errors) |
 | ✅ Phase 5 — Threat Classification and MITRE ATT&CK Intelligence | Implemented and verified (4,545 flagged events classified, 0 validation errors) |
-| ⬜ Explainability dashboard | Not implemented |
-| ⬜ Backend/frontend integration of AI engine output | Not implemented |
+| ✅ Phase 6 — Explainability Engine | Implemented and verified (4,545 events explained, 0 validation errors) |
+| ✅ Phase 7 — Enterprise SOC Dashboard (frontend) | Implemented and verified |
+| ✅ Dashboard Data Export | Implemented and verified (bridges ai-engine output into Phase 7's static fixtures) |
+| ✅ Phase 8 — Enterprise Evaluation Framework | Implemented and verified (independent metrics, benchmarks up to 50,000 entities) |
+| ⬜ Backend domain endpoints for AI engine output | Not implemented — only `GET /api/v1/health` exists |
 | ⬜ ML-based classification | Not implemented |
 | ⬜ Real-time/streaming ingestion | Not implemented |
+| ⬜ Cloud deployment | Not implemented — Docker Compose (local) only |
 
 ## Current Limitations
 
 Stated explicitly so the project's actual state is never overstated:
 
-- **The AI Engine currently operates as an offline CLI pipeline.** There is no long-running service, message queue, or streaming ingestion point — every phase is invoked manually against files on disk.
-- **Frontend/backend integration with AI results is future work.** The backend has no endpoints or ORM models for detection results, risk scores, or classifications; the frontend has no views for them.
-- **The explainability dashboard is future work.** Phase 5's `evidence` field gives a human-readable list of matched indicators per classification, but there is no SHAP-based or visual explainability layer surfaced anywhere yet.
+- **The AI Engine currently operates as an offline CLI pipeline.** There is no long-running service, message queue, or streaming ingestion point — every phase is invoked manually against files on disk. Phase 8's streaming/scalability benchmarks measure how this pipeline *would* perform under continuous load; they do not mean it is deployed that way today.
+- **The backend has no domain endpoints.** Only `GET /api/v1/health` exists. The frontend does not call the backend for alerts, entities, or analytics — see [Frontend ↔ Backend Architecture](#5-frontend--backend-architecture). Detection results, risk scores, and classifications have no ORM models or API routes.
+- **The frontend reads static JSON fixtures, not a live API.** `dashboard_export` writes real pipeline output into `frontend/public/data/*.json` once per export run; the dashboard fetches those files, not a backend endpoint. This is a deliberate architectural choice for this stage of the project, not a bug — see [Data Contracts and Separation of Concerns](#data-contracts-and-separation-of-concerns).
 - **ML-based classification is future work.** `AttackClassifier` is built behind a `ClassificationStrategy` interface specifically so a trained model can be substituted later, but no model has been trained — `RuleBasedClassificationStrategy` is the only strategy implemented today.
-- **Nothing here has been deployed.** Docker Compose runs the stack locally; there is no cloud deployment, SOC integration, or production traffic of any kind.
+- **The Phase 3 profile store has limited real drift history.** The delivered store was built from two runs against the same underlying dataset, so most entities' `drift_score` is at or near 0.0 — Phase 8's concept-drift evaluator reports this honestly rather than simulating drift that isn't in the real data.
+- **Nothing here has been deployed.** Docker Compose runs the stack locally; there is no cloud deployment, SOC integration, or production traffic of any kind. The frontend Docker image also runs Vite's development server, not a production static build behind nginx or similar — see [Deployment.md](Deployment.md).
