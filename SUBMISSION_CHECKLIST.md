@@ -1,5 +1,7 @@
 # SentinelAI — Hackathon Submission Checklist
 
+Access the deployed SentinelAI platform : https://sentinel-ai-hb76.onrender.com/
+
 ## Required Files
 
 | File | Present | Notes |

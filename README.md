@@ -6,6 +6,8 @@
 
 Built for the Honeywell Hackathon.
 
+Access the deployed SentinelAI platform : https://sentinel-ai-hb76.onrender.com/
+
 > **Status: Phase 8 complete.** Synthetic enterprise simulation, behavioural profiling, anomaly detection, risk scoring, threat classification, analyst-facing explainability, an Enterprise SOC Dashboard, and an independent evaluation framework are implemented and verified end-to-end against real generated data (251,884 events / 2,500 entities; 4,545 flagged events classified and explained). A live backend-served domain API, a trained ML model, and real-time streaming ingestion are the next planned phases and are **not** implemented yet.
 
 ---
